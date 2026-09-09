@@ -6,7 +6,7 @@ A lightweight, maintainable PHP ORM for basic CRUD operations using MySQLi.
 
 Install via Composer:
 ```bash
-composer require yourvendor/simple-orm
+composer require muradcade/simple-orm
 ```
 
 ## Setup
