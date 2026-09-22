@@ -2,6 +2,7 @@
   "name": "muradcade/simple-orm",
   "description": "A lightweight, maintainable PHP ORM for modern CRUD operations. Easy to use, secure, and framework-agnostic.",
   "type": "library",
+  "license": "MIT",
   "require": {
     "php": "^8.0"
   },
