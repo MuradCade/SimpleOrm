@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use SimpleOrm\database\DatabaseConnection;
 use SimpleOrm\database\QueryExecutor;
 use SimpleOrm\query\Query;
 
-$env = parse_ini_file(__DIR__ . '/../.env');
+$env = parse_ini_file(__DIR__ . '/../../.env');
 
 $dbConn = new DatabaseConnection(
     $env['DB_HOST'],
@@ -24,8 +24,12 @@ $query = new QueryExecutor($dbConn);
 // }
 
 $stmt = new Query($query);
-// $result = $stmt->getAll('products');
+$result = $stmt->getAll('products');
+// $result = $stmt->create('products', [
+//     'product_name' => 'waryaa'
+// ]);
 
+var_dump($result);
 
 // $get = $stmt->getOne('products', [
 //     'id' => 1

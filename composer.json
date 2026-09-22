@@ -1,7 +1,6 @@
 {
   "name": "muradcade/simple-orm",
   "description": "A lightweight, maintainable PHP ORM for modern CRUD operations. Easy to use, secure, and framework-agnostic.",
-  "version": "1.0.0",
   "type": "library",
   "require": {
     "php": "^8.0"

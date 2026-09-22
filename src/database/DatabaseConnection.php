@@ -4,7 +4,6 @@ namespace SimpleOrm\database;
 
 use mysqli;
 
-
 class DatabaseConnection
 {
 
@@ -16,8 +15,8 @@ class DatabaseConnection
         string $password,
         string $database
     ) {
-        mysqli_report(
-            MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT
+        \mysqli_report(
+           \MYSQLI_REPORT_ERROR | \MYSQLI_REPORT_STRICT
         );
 
         $this->connection = new mysqli(

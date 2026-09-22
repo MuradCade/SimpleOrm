@@ -3,78 +3,68 @@
 namespace SimpleOrm\query;
 
 use SimpleOrm\database\QueryExecutor;
-
+use SimpleOrm\validation\Validate;
 
 class Query
 {
-    private string $table; // is used to store the table name when chaining class (find->update to update and delete)
-    private array $conditions; // used to store the condition
+    private ?string $table = null;
+    private ?array $conditions = null;
     private ?array $data = null;
+
     public function __construct(
         private QueryExecutor $executor
     ) {}
 
     public function getAll(string $table): array
     {
-        $sql = "SELECT * FROM {$table}";
+        Validate::identifier($table);
+
+        $sql = "SELECT * FROM `{$table}`";
 
         $stmt = $this->executor->execute($sql);
 
-        $result = $stmt->get_result();
-
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $stmt
+            ->get_result()
+            ->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getOne(string $table, array $conditions)
-    {
+    public function getOne(
+        string $table,
+        array $conditions
+    ): ?array {
+        Validate::identifier($table);
+        Validate::conditions($conditions);
+
         $where = [];
-        $attribute_type = '';
+        $types = '';
         $params = [];
+
         foreach ($conditions as $column => $value) {
-            $where[] = "$column = ?";
-            if (is_int($value)) {
-                $attribute_type .= 'i';
-            } elseif (is_float($value)) {
-                $attribute_type .= 'd';
-            } else {
-                $attribute_type .= 's';
-            }
+            $where[] = "`{$column}` = ?";
+            $types .= $this->getParameterType($value);
             $params[] = $value;
         }
 
-        $sql = "SELECT * FROM {$table} WHERE " . implode(' AND ', $where);
-        $stmt = $this->executor->execute($sql, $attribute_type, $params);
-        $result = $stmt->get_result();
+        $sql = "SELECT * FROM `{$table}` WHERE "
+            . implode(' AND ', $where);
 
-        return  $result->fetch_assoc() ?? null;
+        $stmt = $this->executor->execute(
+            $sql,
+            $types,
+            $params
+        );
+
+        return $stmt
+            ->get_result()
+            ->fetch_assoc() ?? null;
     }
-    // public function getOne(string $table, array $conditions)
-    // {
-    //     $attribute = []; // holds the column name we need to fetch specific data from
-    //     $attribute_type = ''; // the acutal value that attrube contains
-    //     $params = []; // what kind of value we are loking for (integer (i) , string (s) , decimal (d))
-    //     foreach ($conditions as $column => $value) {
-    //         $attribute['column'] = "$column = ?";
-    //         if (is_int($value)) {
-    //             $attribute_type .= 'i';
-    //         } elseif (is_float($value)) {
-    //             $attribute_type .= 'd';
-    //         } else {
-    //             $attribute_type .= 's';
-    //         }
-    //         $params[] = $value;
-    //     }
-    //     $sql = "SELECT * FROM {$table} where {$attribute['column']}";
-    //     $stmt = $this->executor->execute($sql, $attribute_type, $params);
-    //     $result = $stmt->get_result();
-    //     return $result->fetch_assoc() ?? null;
-    // }
 
-    public function create(string $table, array $data)
-    {
-        // if (empty($data)) {
-        //     throw new InvalidArgumentException("create method can't be empty");
-        // }
+    public function create(
+        string $table,
+        array $data
+    ) {
+        Validate::identifier($table);
+        Validate::data($data);
 
         $columns = array_keys($data);
 
@@ -85,97 +75,129 @@ class Query
                 $columns
             )
         );
-        $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-        $sql = "insert into $table($columnList) values($placeholders)";
+
+        $placeholders = implode(
+            ', ',
+            array_fill(0, count($columns), '?')
+        );
+
+        $sql = "INSERT INTO `{$table}` ({$columnList})
+                VALUES ({$placeholders})";
 
         $types = '';
         $params = [];
+
         foreach ($data as $value) {
-            if (is_int($value)) {
-                $types .= 'i';
-            } elseif (is_float($value)) {
-                $types .= 'd';
-            } else {
-                $types .= 's';
-            }
+            $types .= $this->getParameterType($value);
             $params[] = $value;
         }
 
-        $stmt = $this->executor->execute($sql, $types, $params);
-        return $stmt;
+        return $this->executor->execute(
+            $sql,
+            $types,
+            $params
+        );
     }
 
-    public function find(string $table, array $conditions)
-    {
-        $data = $this->getOne($table, $conditions); // returns array|null
+    public function find(
+        string $table,
+        array $conditions
+    ): self {
+        Validate::identifier($table);
+        Validate::conditions($conditions);
+
         $this->table = $table;
         $this->conditions = $conditions;
-        $this->data = $data;
+        $this->data = $this->getOne(
+            $table,
+            $conditions
+        );
+
         return $this;
     }
-    // this __get helps us to get data object from find method so we can easily access specific attribute
-    public function __get(string $property)
+
+    public function __get(string $property): mixed
     {
         return $this->data[$property] ?? null;
     }
 
-    public function update(array $data)
+    public function update(array $data): bool
     {
-        // $row = $this->find($this->table, $this->conditions);
-        // if (!$row) {
-        //     return null;
-        // }
-        // Build update SQL
+        Validate::queryState(
+            $this->table,
+            $this->conditions
+        );
+
+        Validate::data($data);
+
         $set = [];
         $types = '';
         $params = [];
-        foreach ($data as $col => $val) {
-            $set[] = "$col = ?";
-            $types .= is_int($val) ? 'i' : (is_float($val) ? 'd' : 's');
-            $params[] = $val;
+
+        foreach ($data as $column => $value) {
+            $set[] = "`{$column}` = ?";
+            $types .= $this->getParameterType($value);
+            $params[] = $value;
         }
+
         $where = [];
         $whereTypes = '';
         $whereParams = [];
-        foreach ($this->conditions as $col => $val) {
-            $where[] = "$col = ?";
-            $whereTypes .= is_int($val) ? 'i' : (is_float($val) ? 'd' : 's');
-            $whereParams[] = $val;
+
+        foreach ($this->conditions as $column => $value) {
+            $where[] = "`{$column}` = ?";
+            $whereTypes .= $this->getParameterType($value);
+            $whereParams[] = $value;
         }
-        $sql = "UPDATE {$this->table} SET " . implode(', ', $set) . " WHERE " . implode(' AND ', $where);
-        // var_dump($sql);
-        // die();
-        $stmt = $this->executor->execute($sql, $types . $whereTypes, array_merge($params, $whereParams));
+
+        $sql = "UPDATE `{$this->table}`
+                SET " . implode(', ', $set) . "
+                WHERE " . implode(' AND ', $where);
+
+        $stmt = $this->executor->execute(
+            $sql,
+            $types . $whereTypes,
+            array_merge($params, $whereParams)
+        );
 
         return $stmt->affected_rows > 0;
     }
 
-
-    public function delete()
+    public function delete(): bool
     {
+        Validate::queryState(
+            $this->table,
+            $this->conditions
+        );
+
         $where = [];
         $types = '';
         $params = [];
 
         foreach ($this->conditions as $column => $value) {
-            $where[] = "$column = ?";
-
-            $types .= is_int($value)
-                ? 'i'
-                : (is_float($value) ? 'd' : 's');
-
+            $where[] = "`{$column}` = ?";
+            $types .= $this->getParameterType($value);
             $params[] = $value;
         }
 
-        $sql = "DELETE FROM {$this->table} WHERE " . implode(' AND ', $where);
-        // var_dump($sql);
-        // die();
+        $sql = "DELETE FROM `{$this->table}`
+                WHERE " . implode(' AND ', $where);
 
         $stmt = $this->executor->execute(
             $sql,
             $types,
             $params
         );
+
         return $stmt->affected_rows > 0;
+    }
+
+    private function getParameterType(mixed $value): string
+    {
+        return match (true) {
+            is_int($value) => 'i',
+            is_float($value) => 'd',
+            default => 's',
+        };
     }
 }
