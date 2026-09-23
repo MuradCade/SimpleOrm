@@ -28,6 +28,31 @@ class Query
             ->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function selectWhere(string $table, array $conditions): ?array
+    {
+        $where = [];
+        $values = [];
+        $types = '';
+
+        foreach ($conditions as $column => $value) {
+            $where[] = "`{$column}` = ?";
+            $values[] = $value;
+            $types .= $this->getParameterType($value);
+        }
+
+        $sql = "SELECT * FROM `{$table}` WHERE " . implode(' AND ', $where);
+
+        $stmt = $this->executor->execute(
+            $sql,
+            $types,
+            $values
+        );
+
+        return $stmt
+            ->get_result()
+            ->fetch_all(MYSQLI_ASSOC);
+    }
+
     public function getOne(
         string $table,
         array $conditions

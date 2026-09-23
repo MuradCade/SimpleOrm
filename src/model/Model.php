@@ -110,7 +110,7 @@ abstract class Model
    * This Is Where HasOne Comes From
    */
 
-  public function hasone(
+  public function hasOne(
     string $related,
     string $foreignKey,
     string $localKey = 'id'
@@ -128,7 +128,7 @@ abstract class Model
    * This Is Where HasMany Comes From
    */
 
-  public function hasmany(
+  public function hasMany(
     string $related,
     string $foreignKey,
     string $localKey = 'id'
