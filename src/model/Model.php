@@ -53,7 +53,7 @@ abstract class Model
   }
 
   /**
-   * Get All Records From The Table
+   * Get All Records From The Table 
    */
 
   public function all(): ?array
