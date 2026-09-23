@@ -1,11 +1,13 @@
 <?php
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use SimpleOrm\database\DatabaseConnection;
 use SimpleOrm\database\QueryExecutor;
 use SimpleOrm\query\Query;
 
-$env = parse_ini_file(__DIR__ . '/../../.env');
+require 'user.php';
+
+$env = parse_ini_file(__DIR__ . '/../.env');
 
 $dbConn = new DatabaseConnection(
     $env['DB_HOST'],
@@ -13,8 +15,29 @@ $dbConn = new DatabaseConnection(
     $env['DB_PASSWORD'],
     $env['DB_DATABASE']
 );
-$query = new QueryExecutor($dbConn);
+$executor = new QueryExecutor($dbConn);
+$query = new Query($executor);
 
+
+$userModel = new User($query);
+
+$user = $userModel->where(['id' => 6]);
+var_dump($user->email);
+// var_dump($user);
+// $user = $userModel->find(1);
+// $profile = $user->profile()->get();
+// foreach ($user as $data) {
+//     //     // 
+//     var_dump($data->id);
+// }
+
+// foreach ($profile as $profiles) {
+//     var_dump($profiles->user_id);
+// }
+// var_dump($result);
+// foreach ($result as $data) {
+//     var_dump($data->quantity);
+// }
 // $stmt = $query->execute('SELECT * FROM products');
 // $result = $stmt->get_result();
 // $rows = $result->fetch_all(MYSQLI_ASSOC);
@@ -23,13 +46,13 @@ $query = new QueryExecutor($dbConn);
 //     print_r($row);
 // }
 
-$stmt = new Query($query);
-$result = $stmt->getAll('products');
+// $stmt = new Query($query);
+// $result = $stmt->getAll('products');
 // $result = $stmt->create('products', [
 //     'product_name' => 'waryaa'
 // ]);
 
-var_dump($result);
+// var_dump($result);
 
 // $get = $stmt->getOne('products', [
 //     'id' => 1
