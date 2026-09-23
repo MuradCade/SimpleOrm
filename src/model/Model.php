@@ -56,7 +56,7 @@ abstract class Model
    * Get All Records From The Table
    */
 
-  public function all(array $conditions): ?array
+  public function all(): ?array
   {
 
     $rows = $this->query->getAll($this->table);
