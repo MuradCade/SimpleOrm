@@ -21,13 +21,14 @@ $query = new Query($executor);
 
 $userModel = new User($query);
 
-$user = $userModel->all();
+$user = $userModel->where(['id' => 6]);
+var_dump($user->email);
 // var_dump($user);
 // $user = $userModel->find(1);
 // $profile = $user->profile()->get();
-// foreach ($profile as $data) {
-
-//     var_dump($data->id, $user->name);
+// foreach ($user as $data) {
+//     //     // 
+//     var_dump($data->id);
 // }
 
 // foreach ($profile as $profiles) {
