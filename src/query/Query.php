@@ -117,11 +117,13 @@ class Query
             $params[] = $value;
         }
 
-        return $this->executor->execute(
+        $result = $this->executor->execute(
             $sql,
             $types,
             $params
         );
+
+        return $result->insert_id;
     }
 
     public function find(

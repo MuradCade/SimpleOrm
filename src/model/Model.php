@@ -27,7 +27,18 @@ abstract class Model
     $record = $this->query->create($this->table, $data);
     return $record;
   }
+  /** 
+   * Update old record through model
+   */
+  public function update(array $data): bool
+  {
 
+    // var_dump($this->attributes['id']);
+    // first find the row been updated
+    $find = $this->query->find($this->table, ['id' => $this->attributes['id']])->update($data);
+    // $updated_record_response = $;
+    return $find;
+  }
 
   /** 
    * Find Model By Its Primary Key 
