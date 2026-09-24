@@ -27,22 +27,6 @@ abstract class Model
     $record = $this->query->create($this->table, $data);
     return $record;
   }
-  /** 
-   * Update already exist record through model
-   */
-  public function update(array $data): bool
-  {
-
-    // var_dump($this->attributes['id']);
-    // first find the row been updated
-    $find_row = $this->query->find($this->table, ['id' => $this->attributes['id']]);
-    $update = $find_row->update($data);
-    // $updated_record_response = $;
-    return $update;
-  }
-
-
-
 
   /** 
    * Find Model By Its Primary Key 
@@ -111,6 +95,35 @@ abstract class Model
     }
     return $this->hydrate($data);
   }
+
+  /** 
+   * Update already exist record through model
+   */
+  public function update(array $data): bool
+  {
+
+    // var_dump($this->attributes['id']);
+    // first find the row been updated
+    $find_row = $this->query->find($this->table, ['id' => $this->attributes['id']]);
+    $update = $find_row->update($data);
+    // $updated_record_response = $;
+    return $update;
+  }
+
+  /** 
+   * Delete already exist record through model
+   */
+  public function delete(): bool
+  {
+
+    // var_dump($this->attributes['id']);
+    // first find the row been updated
+    $find_row = $this->query->find($this->table, ['id' => $this->attributes['id']]);
+    $delete_row = $find_row->delete();
+    // $updated_record_response = $;
+    return $delete_row;
+  }
+
 
   /**
    * Access Database Attributes 
