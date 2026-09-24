@@ -28,17 +28,21 @@ abstract class Model
     return $record;
   }
   /** 
-   * Update old record through model
+   * Update already exist record through model
    */
   public function update(array $data): bool
   {
 
     // var_dump($this->attributes['id']);
     // first find the row been updated
-    $find = $this->query->find($this->table, ['id' => $this->attributes['id']])->update($data);
+    $find_row = $this->query->find($this->table, ['id' => $this->attributes['id']]);
+    $update = $find_row->update($data);
     // $updated_record_response = $;
-    return $find;
+    return $update;
   }
+
+
+
 
   /** 
    * Find Model By Its Primary Key 
