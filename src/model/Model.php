@@ -18,6 +18,18 @@ abstract class Model
   }
 
   /** 
+   * Insert new record through model
+   */
+
+  public function create(array $data): int
+  {
+
+    $record = $this->query->create($this->table, $data);
+    return $record;
+  }
+
+
+  /** 
    * Find Model By Its Primary Key 
    */
 
